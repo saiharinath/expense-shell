@@ -3,43 +3,25 @@ component=backend
 
 echo Install nodeJS repos
 curl -sL https://rpm.nodesource.com/setup_lts.x | bash &>>$log_file
-if [ $? -eq 0 ]; then
-  echo -e "\e[32mSUCCESS\e[0m"
-else
- echo -e "\e[31mFAILED\e[0m"
- exit
-fi
+stat_check
 
 echo Install nodeJS
 dnf install nodejs -y &>>$log_file
-if [ $? -eq 0 ]; then
-  echo -e "\e[32mSUCCESS\e[0m"
-else
- echo -e "\e[31mFAILED\e[0m"
- exit
-fi
+stat_check
 
 echo copy backend service file
 cp backend.service /etc/systemd/system/backend.service &>>$log_file
-if [ $? -eq 0 ]; then
-  echo -e "\e[32mSUCCESS\e[0m"
-else
- echo -e "\e[31mFAILED\e[0m"
- exit
-fi
+stat_check
 
 echo add application user
-useradd expense &>>$log_file
-if [ $? -eq 0 ]; then
-  echo -e "\e[32mSUCCESS\e[0m"
-else
- echo -e "\e[31mFAILED\e[0m"
- exit
+if [ $? -ne 0]; then
+ useradd expense &>>$log_file
 fi
+stat_check
 
 echo clean app content
 rm -rf /app &>>$log_file
-echo $?
+stat_check
 
 mkdir /app
 cd /app
@@ -48,18 +30,18 @@ Download_and_extract
 
 echo download dependencies
 npm install &>>$log_file
-echo $?
+stat_check
 
 echo start backend service
 systemctl daemon-reload &>>$log_file
 systemctl enable backend &>>$log_file
 systemctl start backend &>>$log_file
-echo $?
+stat_check
 
 echo Install mysql client
 dnf install mysql -y &>>$log_file
-echo $?
+stat_check
 
 echo load schema
 mysql -h mysql.saiharinath.online -uroot -pExpenseApp@1 < /app/schema/backend.sql &>>$log_file
-echo $?
+stat_check
